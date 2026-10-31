@@ -112,3 +112,7 @@ The whole app is a single Python file, `switchpad.py`. Run it straight from the 
 References:
 - [SwitchBot Cloud API v1.1](https://github.com/OpenWonderLabs/SwitchBotAPI)
 - [SwitchBot Bluetooth API](https://github.com/OpenWonderLabs/SwitchBotAPI-BLE)
+
+## License
+
+SwitchPad is released under the [MIT License](LICENSE).
