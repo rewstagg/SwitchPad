@@ -29,9 +29,10 @@ try:
 except (ValueError, ImportError):
     Secret = None
 
-APP_ID = "io.switchpad.SwitchPad"
+APP_ID = "io.github.rewstagg.SwitchPad"
+LEGACY_APP_ID = "io.switchpad.SwitchPad"  # used up to 1.0.0
 APP_NAME = "SwitchPad"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 API = "https://api.switch-bot.com/v1.1"
 
 CONFIG_DIR = os.path.join(GLib.get_user_config_dir(), "switchpad")
@@ -127,10 +128,29 @@ class SwitchBotClient:
 # --------------------------------------------------------------------------
 # Credential storage
 # --------------------------------------------------------------------------
-SCHEMA = None
+SCHEMA = LEGACY_SCHEMA = None
 if Secret is not None:
     SCHEMA = Secret.Schema.new(APP_ID, Secret.SchemaFlags.NONE,
                                {"account": Secret.SchemaAttributeType.STRING})
+    # Keyring entries saved before the app ID changed (versions <= 1.0.0).
+    LEGACY_SCHEMA = Secret.Schema.new(LEGACY_APP_ID, Secret.SchemaFlags.NONE,
+                                      {"account": Secret.SchemaAttributeType.STRING})
+
+
+def _migrate_legacy_creds():
+    """Move credentials stored under the old app ID to the current one."""
+    try:
+        s = Secret.password_lookup_sync(LEGACY_SCHEMA, {"account": "default"},
+                                        None)
+        if not s:
+            return None
+        creds = json.loads(s)
+        if save_creds(creds["token"], creds["secret"]) == "keyring":
+            Secret.password_clear_sync(LEGACY_SCHEMA, {"account": "default"},
+                                       None)
+        return creds
+    except (GLib.Error, ValueError, KeyError):
+        return None
 
 
 def load_creds():
@@ -141,6 +161,9 @@ def load_creds():
                 return json.loads(s)
         except (GLib.Error, ValueError):
             pass
+        creds = _migrate_legacy_creds()
+        if creds:
+            return creds
     try:
         with open(CRED_FILE) as f:
             return json.load(f)
