@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=SwitchPad
+Comment=Control SwitchBot devices, IR remotes and scenes
+Exec=switchpad
+Icon=io.switchpad.SwitchPad
+Terminal=false
+Categories=Utility;GTK;
+Keywords=SwitchBot;smart home;remote;light;plug;curtain;lock;
+StartupNotify=true
+X-Purism-FormFactor=Workstation;Mobile;
+X-Phosh-UsesFeedback=false
